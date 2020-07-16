@@ -12,12 +12,13 @@
 
         - name: do checking....
           uri:
-            url: "http://{{ inventory_hostname }}:5000/redfish/v1/Systems/1"
+            url: "http://{{ inventory_hostname }}/redfish/v1/Systems/1"
             # refer to group_vars/huawei_redfish.yml
             url_username: "{{ username }}"
             url_password: "{{ password }}"
             force_basic_auth: yes
             return_content: yes
+            validate_certs: no
             timeout: 5
             status_code: 200
           register: contents
@@ -33,13 +34,13 @@
       rescue:
         - set_fact:
             result: failed
-        - fail: 
+        - fail:
             msg: error is happened
           when: result == "failed"
-        - name:  
+        - name:
           debug:
-            msg: 'I also never execute :-('
+            msg: "I also never execute :-("
       always:
         - name: always to check result
           debug:
-            msg: "all tasks are finished, result is {{ result }}"  
+            msg: "all tasks are finished, result is {{ result }}"
