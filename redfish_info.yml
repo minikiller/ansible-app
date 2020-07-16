@@ -12,7 +12,7 @@
 
         - name: do checking....
           uri:
-            url: "http://{{ inventory_hostname }}/redfish/v1/Systems/1"
+            url: "https://{{ inventory_hostname }}/redfish/v1/Systems/1"
             # refer to group_vars/huawei_redfish.yml
             url_username: "{{ username }}"
             url_password: "{{ password }}"
