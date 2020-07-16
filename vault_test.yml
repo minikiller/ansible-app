@@ -5,4 +5,4 @@
   tasks:
     - name: run debug
       debug:
-        msg: "{{username1}} is {{password1}}"
+        msg: "{{username}} is {{password}}"
