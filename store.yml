@@ -1,0 +1,63 @@
+---
+- name: check server health based on OceanStor9000 rest service
+  hosts: group4
+  gather_facts: no
+  vars:
+    result: ok
+    port: 5000
+  tasks:
+    - name: Check if server is health
+      block:
+        - debug:
+            var: inventory_hostname
+
+        - name: do login ....
+          uri:
+            url: "http://{{ inventory_hostname }}:{{port}}/deviceManager/rest/xxxxx/login"
+            # refer to group_vars/huawei_redfish.yml
+            # url_username: "{{ username }}"
+            # url_password: "{{ password }}"
+            # force_basic_auth: yes
+            # method: POST
+            return_content: yes
+            validate_certs: no
+            timeout: 5
+            status_code: 200
+            body: '{"scope":0,"username":{{ username }},"password":{{ password }}}'
+          register: contents
+          delegate_to: localhost
+        - set_fact:
+            deviceid: "{{ contents.json.data.deviceid }}"
+            iBaseToken: "{{ contents.json.data.iBaseToken }}"
+        - name: do check ....
+          uri:
+            url: "http://{{ inventory_hostname }}:{{port}}/deviceManager/rest/{{deviceid}}/system"
+            # refer to group_vars/huawei_redfish.yml
+            # url_username: "{{ username }}"
+            # url_password: "{{ password }}"
+            # force_basic_auth: yes
+            return_content: yes
+            validate_certs: no
+            timeout: 5
+            status_code: 200
+            headers:
+              iBaseToken: "{{iBaseToken}}"
+          register: results
+          delegate_to: localhost
+        - name: check if it is health
+          debug: msg="{{ results.json }}"
+          register: status
+          failed_when: status.msg.data.HEALTHSTATUS != "1"
+      rescue:
+        - set_fact:
+            result: failed
+        - fail:
+            msg: error is happened
+          when: result == "failed"
+        - name:
+          debug:
+            msg: "I also never execute :-("
+      always:
+        - name: always to check result
+          debug:
+            msg: "all tasks are finished, result is {{ result }}"
